@@ -4,26 +4,27 @@ FROM python:3.8-slim
 # Set working directory
 WORKDIR /app
 
-# Set environment variables to disable interactive prompts
-# ENV DEBIAN_FRONTEND=noninteractive
-
-# Install system dependencies and Chrome dependencies
+# Install system dependencies and specific Chrome + ChromeDriver versions
 RUN apt update && apt install -y \
     wget \
     unzip \
-    && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt-get install ./google-chrome-stable_current_amd64.deb -y \
-    && wget https://storage.googleapis.com/chrome-for-testing-public/136.0.7103.59/linux64/chromedriver-linux64.zip \
+    && wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_147.0.7727.137-1_amd64.deb \
+    && apt install ./google-chrome-stable_147.0.7727.137-1_amd64.deb -y \
+    && wget https://storage.googleapis.com/chrome-for-testing-public/147.0.7727.137/linux64/chromedriver-linux64.zip \
     && unzip chromedriver-linux64.zip \
     && mv chromedriver-linux64/chromedriver /usr/bin/chromedriver \
-    #&& chown root:root /usr/bin/chromedriver \
     && chmod +x /usr/bin/chromedriver \
     && apt install python3-pip -y \
-    && pip install selenium --break-system-packages \
-    #&& pip install webdriver-manager --break-system-packages \
-    && rm chromedriver-linux64.zip google-chrome-stable_current_amd64.deb
+    && pip install --upgrade pip \
+    && pip install selenium webdriver-manager \
+    && rm -rf chromedriver-linux64.zip google-chrome-stable_147.0.7727.137-1_amd64.deb \
+    && apt clean
 
-# Copy selenium testcase code
+# Create a non-root user (avoids pip root warning)
+RUN useradd -m -s /bin/bash appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Copy application code
 COPY firsttest.py .
 
 # Run the application
