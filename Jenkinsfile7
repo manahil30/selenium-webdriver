@@ -8,25 +8,23 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image
-                    sh '''docker build -t $IMAGE_NAME .
-                          docker images'''                    
+                    sh 'docker build -t $IMAGE_NAME .'
                 }
             }
         }
-    stage('Run Selenium Tests') {
+        stage('Run Selenium Tests') {
             steps {
                 script {
                     // Run the Docker container and execute the tests
-                    // sh 'docker run --rm ${env.IMAGE_NAME}'
-                     sh 'docker run $IMAGE_NAME'
+                    sh 'docker run --rm $IMAGE_NAME'
                 }
             }
         }
     }
-     post {
-            always {
-                // Cleanup: remove any unused images, volumes, etc.
-                sh 'docker system prune -af'
-            }
+    post {
+        always {
+            // Cleanup: remove any unused images, volumes, etc.
+            sh 'docker system prune -af'
         }
+    }
 }
